@@ -1,19 +1,23 @@
-import time, subprocess
+import time, subprocess, sys
 from subprocess import Popen, PIPE
 
-
 class SoftHand:
-    com_port = "COM 4"
     def __init__(self):
         pass
 
     def writeStep(self, step, process):
         ##### Writes control command to main.exe #####
+        # step = action identifier
+        # process = variable assigned to startup() function
+
         process.stdin.write('{}\n'.format(step))
         process.stdin.flush()
 
     def setPosition(self, u, process):
-        ##### Writes desired u value to main.exe. Must be integer in range 0-19000 #####
+        ##### Writes desired encoder position to main.exe. #####
+        # u = encoder position (integer in range 0-19000)
+        # process = variable assigned to startup() function
+
         if u < 0 or u >= 19000:
             self.terminate(u, process)
             raise ValueError("'u' cannot exceed range 0-19000")
@@ -28,6 +32,8 @@ class SoftHand:
 
     def getPosition(self, process):
         ##### Gets encoder position which is returned as an integer #####
+        # process = variable assigned to startup() function
+
         self.writeStep(2, process)
         time.sleep(0.001)
         self.writeStep(22, process) 
@@ -37,6 +43,8 @@ class SoftHand:
 
     def getCurrent(self, process):
         ##### Gets motor current which is returned as an integer #####
+        # process = variable assigned to startup() function
+
         self.writeStep(2, process)
         time.sleep(0.001)
         self.writeStep(23, process) 
@@ -46,11 +54,17 @@ class SoftHand:
 
     def checkConsole(self, process):
         ##### Reads back messages from main.exe #####
+        # process = variable assigned to startup() function
+
         check = process.stdout.readline()
         print('from main.exe:', check)
 
     def startup(self, com_port):
         ##### Startup routine #####
+        # com_port = COM port to which SoftHand is assigned. Must be of type string.
+        if isinstance(com_port, str) == False:
+            raise ValueError("'com_port' must be of type str")
+
         # Open main.exe pipe and startup comms with hand:
         process = Popen('main', stdin=PIPE, stdout=PIPE, universal_newlines=True, shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         print('subprocess started')
