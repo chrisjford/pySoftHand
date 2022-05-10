@@ -1,17 +1,24 @@
-import time, subprocess, sys
+import time, subprocess, os, signal
 from subprocess import Popen, PIPE
 
 class SoftHand:
     def __init__(self):
         pass
 
-    def writeStep(self, step, process):
+    def __writeStep__(self, step, process):
         ##### Writes control command to main.exe #####
         # step = action identifier
         # process = variable assigned to startup() function
 
         process.stdin.write('{}\n'.format(step))
         process.stdin.flush()
+    
+    def __checkConsole__(self, process):
+        ##### Reads back messages from main.exe #####
+        # process = variable assigned to startup() function
+
+        check = process.stdout.readline()
+        print('from main.exe:', check)
 
     def setPosition(self, u, process):
         ##### Writes desired encoder position to main.exe. #####
@@ -25,7 +32,7 @@ class SoftHand:
             self.terminate(u, process)
             raise TypeError("'u' must be of type int")
         else:
-            self.writeStep(3, process)
+            self.__writeStep__(3, process)
             process.stdin.write('{}\n'.format(u))
             process.stdin.flush()
             time.sleep(0.001)
@@ -34,9 +41,9 @@ class SoftHand:
         ##### Gets encoder position which is returned as an integer #####
         # process = variable assigned to startup() function
 
-        self.writeStep(2, process)
+        self.__writeStep__(2, process)
         time.sleep(0.001)
-        self.writeStep(22, process) 
+        self.__writeStep__(22, process) 
         posn = process.stdout.readline()
         posn = int(posn)
         return posn
@@ -45,19 +52,12 @@ class SoftHand:
         ##### Gets motor current which is returned as an integer #####
         # process = variable assigned to startup() function
 
-        self.writeStep(2, process)
+        self.__writeStep__(2, process)
         time.sleep(0.001)
-        self.writeStep(23, process) 
+        self.__writeStep__(23, process) 
         curr = process.stdout.readline()
         curr = int(curr)
         return curr
-
-    def checkConsole(self, process):
-        ##### Reads back messages from main.exe #####
-        # process = variable assigned to startup() function
-
-        check = process.stdout.readline()
-        print('from main.exe:', check)
 
     def startup(self, com_port):
         ##### Startup routine #####
@@ -70,15 +70,15 @@ class SoftHand:
         print('subprocess started')
 
         # Write step number to main.exe to trigger startup:
-        self.writeStep(1, process)
+        self.__writeStep__(1, process)
         process.stdin.write('{}\n'.format(com_port))
         process.stdin.flush()
         time.sleep(0.001)
 
         # Read back checks:
-        self.checkConsole(process) # 'Startup initiated...'
-        self.checkConsole(process)# '1. a) Comms open'
-        self.checkConsole(process) # '1. b) Motors activated'
+        self.__checkConsole__(process) # 'Startup initiated...'
+        self.__checkConsole__(process)# '1. a) Comms open'
+        self.__checkConsole__(process) # '1. b) Motors activated'
 
         # Returns subprocess details for reference to subsequent function calls:
         return process
@@ -92,8 +92,9 @@ class SoftHand:
 
             time.sleep(2)
 
-        self.writeStep(4, process)
+        self.__writeStep__(4, process)
 
         print('----------------------------- ')
-        self.checkConsole(process) # 'closing comms...'
+        self.__checkConsole__(process) # 'closing comms...'
         print('Python: terminating...')
+        os.kill(process.pid, signal.CTRL_BREAK_EVENT)
