@@ -10,11 +10,11 @@ This library features a selection of functions from the qbRobotics qbAPI for con
 ## Instructions for use:
 The source code for the functions in this library is pre-built into **main.exe** and as such it is easy to get started:  
 
-1. Place this folder in the root directory of your project.  
+1. Extract the contents of this folder in the root directory of your project.  
 2. Plug in your SoftHand via USB and locate the port number. This should be defined as a string and passed as an input argument to the **startup()** function.  
-3. To import functions, specify "from pySoftHand.pySofthand import SoftHand" at the beginning of your program. Then, use a with statement to instantiate the class, specifying the COM port the SoftHand is on. Example of moving a SoftHand on COM4 to encoder position 7500:  
+3. To import functions, specify "from pySofthand import SoftHand" at the beginning of your program. Then, use a with statement to instantiate the class, specifying the COM port the SoftHand is on. Example of moving a SoftHand on COM4 to encoder position 7500:  
     ```python
-    from pySoftHand.pySoftHand import Softhand  
+    from pySoftHand import Softhand  
     with SoftHand("COM4") as sh:
         sh.setPosition(7500)
     ```
